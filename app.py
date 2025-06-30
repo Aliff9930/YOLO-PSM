@@ -38,7 +38,7 @@ def get_yolo_color(class_name):
 
 # Load YOLOv11 Model
 model = YOLO("YOLO11-Improved.pt")
-model.to('cuda')
+model.to('cpu')
 
 st.title("🚦 YOLOv11 Traffic Camera Analysis Dashboard")
 
@@ -123,7 +123,7 @@ if uploaded_video:
         if not success:
             continue
 
-        results = model(frame, device='cuda')
+        results = model(frame, device='cpu')
         det_class_count = {}
 
         for result in results:
