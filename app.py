@@ -166,18 +166,40 @@ uploaded_images = st.file_uploader("📸 Upload image(s) for detection", type=["
 
 if uploaded_images:
     st.subheader("Image Detection Results")
+    image_class_counts = {}
+
     for image_file in uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
         results = model(img, device='cpu')
+
+        frame_counts = {}
         for result in results:
             for box, conf, cls in zip(result.boxes.xyxy, result.boxes.conf, result.boxes.cls):
                 x1, y1, x2, y2 = map(int, box[:4])
                 class_id = int(cls)
                 class_name = model.names[class_id]
                 color = get_yolo_color(class_name)
+
                 cv2.rectangle(img, (x1, y1), (x2, y2), color, 1)
                 cv2.putText(img, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=image_file.name, use_container_width=True)
+                # Count per image and overall
+                frame_counts[class_name] = frame_counts.get(class_name, 0) + 1
+                image_class_counts[class_name] = image_class_counts.get(class_name, 0) + 1
+
+        # Build caption
+        if frame_counts:
+            caption = "\n".join([f"{k}: {v}" for k, v in frame_counts.items()])
+        else:
+            caption = "No detections."
+
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=caption, use_container_width=True)
+
+    if image_class_counts:
+        st.subheader("📊 Image Class Distribution")
+        image_df = pd.DataFrame(list(image_class_counts.items()), columns=["Class", "Count"]).sort_values(by="Count", ascending=False)
+        fig = px.pie(image_df, values="Count", names="Class", hole=0.4, title="Detected Objects in Images")
+        st.plotly_chart(fig, use_container_width=True)
+
