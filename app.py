@@ -170,7 +170,7 @@ if uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
-        results = model(img, device='cuda')
+        results = model(img, device='cpu')
         for result in results:
             for box, conf, cls in zip(result.boxes.xyxy, result.boxes.conf, result.boxes.cls):
                 x1, y1, x2, y2 = map(int, box[:4])
