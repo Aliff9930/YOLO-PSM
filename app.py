@@ -32,6 +32,7 @@ CLASS_COLOR_MAP = {
     'pedestrian': (180, 105, 255),
     'van': (0, 165, 255)
 }
+
 def get_yolo_color(class_name):
     return CLASS_COLOR_MAP.get(class_name, (255, 255, 255))
 
@@ -189,6 +190,4 @@ if uploaded_images:
     image_time_df = pd.DataFrame(columns=model.names.values())
     for classes in image_timeline:
         row = {cls: classes.count(cls) for cls in model.names.values()}
-        image_time_df = pd.concat([image_time_df, pd.DataFrame([row])], ignore_index=True)
-    image_time_df.fillna(0, inplace=True)
-    image_time_df.index = [f"Image {i+1}" for
+        image_time_df = pd.concat([image_time
