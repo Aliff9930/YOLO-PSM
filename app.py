@@ -69,7 +69,7 @@ if uploaded_video:
         if not ret:
             break
 
-        results = model(frame, device='cuda')
+        results = model(frame, device='cpu')
         frame_classes = []
 
         for result in results:
