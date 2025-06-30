@@ -54,7 +54,7 @@ if uploaded_video:
     fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
     width, height = int(cap.get(3)), int(cap.get(4))
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    out_path = "D:/PSM/streamlit/annotated_output.mp4"
+    out_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
 
     class_counts = {}
@@ -85,7 +85,7 @@ if uploaded_video:
 
         timeline_data.append(frame_classes)
         out.write(frame)
-        stframe.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), use_column_width=True)
+        stframe.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), use_container_width=True)
         progress.progress((frame_num + 1) / total_frames)
 
     cap.release()
@@ -143,7 +143,7 @@ if uploaded_video:
     cols = st.columns(3)
     for i, (img, cap_text) in enumerate(gallery_frames):
         with cols[i % 3]:
-            st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=cap_text, use_column_width=True)
+            st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=cap_text, use_container_width=True)
 
     # Color Legend
     st.subheader("🎨 Bounding Box Color Legend")
@@ -180,4 +180,4 @@ if uploaded_images:
                 cv2.rectangle(img, (x1, y1), (x2, y2), color, 1)
                 cv2.putText(img, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=image_file.name, use_column_width=True)
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=image_file.name, use_container_width=True)
