@@ -22,7 +22,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Class Color Map
+# Color Map for Classes
 CLASS_COLOR_MAP = {
     'bicycle': (71, 99, 255),
     'bus': (113, 179, 60),
@@ -36,7 +36,7 @@ CLASS_COLOR_MAP = {
 def get_yolo_color(class_name):
     return CLASS_COLOR_MAP.get(class_name, (255, 255, 255))
 
-# Load YOLO Model
+# Load YOLOv11 Model
 model = YOLO("YOLO11-Improved.pt")
 model.to('cpu')
 
@@ -61,6 +61,7 @@ if uploaded_video:
     timeline_data = []
     stframe = st.empty()
     progress = st.progress(0)
+
     st.subheader("Processing video...")
 
     for frame_num in range(total_frames):
@@ -91,11 +92,13 @@ if uploaded_video:
     out.release()
     st.success("✅ Video processing complete!")
 
-    # --- VIDEO ANALYTICS ---
+    # Class Distribution Pie Chart
     st.subheader("Class Distribution")
     class_df = pd.DataFrame(list(class_counts.items()), columns=["Class", "Count"]).sort_values(by="Count", ascending=False)
-    st.plotly_chart(px.pie(class_df, values="Count", names="Class", hole=0.4, title="Object Detection Summary"), use_container_width=True)
+    fig1 = px.pie(class_df, values="Count", names="Class", hole=0.4, title="Object Detection Summary")
+    st.plotly_chart(fig1, use_container_width=False)
 
+    # Timeline Line Chart
     st.subheader("Detections Over Time")
     timeline_df = pd.DataFrame(columns=model.names.values())
     for classes in timeline_data:
@@ -104,12 +107,14 @@ if uploaded_video:
     timeline_df.fillna(0, inplace=True)
     second_df = timeline_df.groupby(timeline_df.index // int(fps)).sum()
     second_df.index.name = "Seconds"
-    st.plotly_chart(px.line(second_df, title="Detections per Class (Per Second)", markers=True), use_container_width=True)
 
-    # --- GALLERY ---
+    fig2 = px.line(second_df, title="Detections per Class (Per Second)", markers=True)
+    st.plotly_chart(fig2, use_container_width=True)
+
+    # Frame Gallery
     st.subheader("Frame Gallery")
     cap = cv2.VideoCapture(video_path)
-    frame_interval = int(fps)
+    frame_interval = int(fps * 1)
     gallery_frames = []
 
     for frame_idx in range(0, total_frames, frame_interval):
@@ -120,6 +125,7 @@ if uploaded_video:
 
         results = model(frame, device='cpu')
         det_class_count = {}
+
         for result in results:
             for box, conf, cls in zip(result.boxes.xyxy, result.boxes.conf, result.boxes.cls):
                 x1, y1, x2, y2 = map(int, box[:4])
@@ -131,6 +137,7 @@ if uploaded_video:
         timestamp = str(timedelta(seconds=int(frame_idx / fps)))
         caption = f"{timestamp}\n" + "\n".join([f"{k}: {v}" for k, v in det_class_count.items()])
         gallery_frames.append((frame.copy(), caption))
+
     cap.release()
 
     cols = st.columns(3)
@@ -138,56 +145,39 @@ if uploaded_video:
         with cols[i % 3]:
             st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=cap_text, use_container_width=True)
 
-    # --- LEGEND ---
+    # Color Legend
     st.subheader("🎨 Bounding Box Color Legend")
     legend_items = []
     for class_name, bgr in CLASS_COLOR_MAP.items():
         hex_color = '#%02x%02x%02x' % bgr[::-1]
         color_box = f"<span style='display:inline-block;width:16px;height:16px;background-color:{hex_color};margin-right:8px;border-radius:3px;'></span>"
         legend_items.append(f"{color_box} <b>{class_name}</b>")
+
     st.markdown("<br>".join(legend_items), unsafe_allow_html=True)
 
-    # --- DOWNLOAD ---
+    # Download Section
     st.subheader("Download Annotated Video")
     with open(out_path, "rb") as f:
         st.download_button("⬇️ Download Processed Video", f, file_name="annotated_traffic.mp4")
+
 
 # --- IMAGE SECTION ---
 uploaded_images = st.file_uploader("📸 Upload image(s) for detection", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
 if uploaded_images:
     st.subheader("Image Detection Results")
-    image_class_counts = {}
-    image_timeline = []
-
     for image_file in uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
         results = model(img, device='cpu')
-        frame_classes = []
-
         for result in results:
             for box, conf, cls in zip(result.boxes.xyxy, result.boxes.conf, result.boxes.cls):
                 x1, y1, x2, y2 = map(int, box[:4])
                 class_id = int(cls)
                 class_name = model.names[class_id]
                 color = get_yolo_color(class_name)
-                frame_classes.append(class_name)
-                image_class_counts[class_name] = image_class_counts.get(class_name, 0) + 1
                 cv2.rectangle(img, (x1, y1), (x2, y2), color, 1)
                 cv2.putText(img, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-        image_timeline.append(frame_classes)
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption=image_file.name, use_container_width=True)
-
-    # --- IMAGE ANALYTICS ---
-    st.subheader("📊 Image Class Distribution")
-    image_df = pd.DataFrame(list(image_class_counts.items()), columns=["Class", "Count"]).sort_values(by="Count", ascending=False)
-    st.plotly_chart(px.pie(image_df, values="Count", names="Class", hole=0.4, title="Object Detection (Images)"), use_container_width=True)
-
-    st.subheader("🕒 Image-by-Image Detection Timeline")
-    image_time_df = pd.DataFrame(columns=model.names.values())
-    for classes in image_timeline:
-        row = {cls: classes.count(cls) for cls in model.names.values()}
-        image_time_df = pd.concat([image_time
