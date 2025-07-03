@@ -72,7 +72,7 @@ if uploaded_video:
         if not ret:
             break
 
-        results = model(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
+        results = model.predict(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
         frame_classes = []
 
         for result in results:
@@ -126,7 +126,7 @@ if uploaded_video:
         if not success:
             continue
 
-        results = model(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
+        results = model.predict(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
         det_class_count = {}
 
         for result in results:
@@ -175,7 +175,7 @@ if uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
-        results = model(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
+       results = model.predict(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
 
         frame_counts = {}
         for result in results:
