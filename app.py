@@ -175,7 +175,7 @@ if uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
-       results = model.predict(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
+        results = model.predict(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
 
         frame_counts = {}
         for result in results:
