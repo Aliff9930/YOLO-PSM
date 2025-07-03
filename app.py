@@ -22,6 +22,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
 # Color Map for Classes
 CLASS_COLOR_MAP = {
     'bicycle': (71, 99, 255),
@@ -38,7 +39,7 @@ def get_yolo_color(class_name):
 
 # Load YOLOv11 Model
 model = YOLO("visdrone11best.pt")
-model.to('cpu')
+model.to('cpu', conf=0.3)
 
 st.title("🚦 YOLOv11 Traffic Camera Analysis Dashboard")
 
@@ -69,7 +70,7 @@ if uploaded_video:
         if not ret:
             break
 
-        results = model(frame, device='cpu')
+        results = model(frame, device='cpu', conf=0.3)
         frame_classes = []
 
         for result in results:
@@ -123,7 +124,7 @@ if uploaded_video:
         if not success:
             continue
 
-        results = model(frame, device='cpu')
+        results = model(frame, device='cpu', conf=0.3)
         det_class_count = {}
 
         for result in results:
@@ -172,7 +173,7 @@ if uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
-        results = model(img, device='cpu')
+        results = model(img, device='cpu', conf=0.3)
 
         frame_counts = {}
         for result in results:
