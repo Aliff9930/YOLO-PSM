@@ -40,7 +40,9 @@ def get_yolo_color(class_name):
 # Load YOLOv11 Model
 model = YOLO("visdrone11best.pt")
 model.to('cpu')
-
+st.sidebar.header("🔧 Detection Settings")
+conf_threshold = st.sidebar.slider("Confidence Threshold", 0.1, 0.9, 0.3, 0.05)
+iou_threshold = st.sidebar.slider("IoU Threshold (NMS)", 0.1, 0.9, 0.4, 0.05)
 st.title("🚦 YOLOv11 Traffic Camera Analysis Dashboard")
 
 # --- VIDEO SECTION ---
@@ -70,7 +72,7 @@ if uploaded_video:
         if not ret:
             break
 
-        results = model(frame, device='cpu', conf=0.3)
+        results = model(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
         frame_classes = []
 
         for result in results:
@@ -124,7 +126,7 @@ if uploaded_video:
         if not success:
             continue
 
-        results = model(frame, device='cpu', conf=0.3)
+        results = model(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
         det_class_count = {}
 
         for result in results:
@@ -173,7 +175,7 @@ if uploaded_images:
         file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
 
-        results = model(img, device='cpu', conf=0.3)
+        results = model(frame, device='cpu', conf=conf_threshold, iou=iou_threshold)
 
         frame_counts = {}
         for result in results:
