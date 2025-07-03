@@ -37,7 +37,7 @@ def get_yolo_color(class_name):
     return CLASS_COLOR_MAP.get(class_name, (255, 255, 255))
 
 # Load YOLOv11 Model
-model = YOLO("YOLO11- ImprovedP2.pt")
+model = YOLO("visdrone11best.pt")
 model.to('cpu')
 
 st.title("🚦 YOLOv11 Traffic Camera Analysis Dashboard")
