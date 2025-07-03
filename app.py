@@ -39,7 +39,7 @@ def get_yolo_color(class_name):
 
 # Load YOLOv11 Model
 model = YOLO("visdrone11best.pt")
-model.to('cpu', conf=0.3)
+model.to('cpu')
 
 st.title("🚦 YOLOv11 Traffic Camera Analysis Dashboard")
 
