@@ -82,7 +82,7 @@ if uploaded_video:
                 class_name = model.names[class_id]
                 color = get_yolo_color(class_name)
 
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 1)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                 frame_classes.append(class_name)
                 class_counts[class_name] = class_counts.get(class_name, 0) + 1
 
