@@ -38,7 +38,7 @@ def get_yolo_color(class_name):
     return CLASS_COLOR_MAP.get(class_name, (255, 255, 255))
 
 # Load YOLOv11 Model
-model = YOLO("YOLO11- Improved.pt")
+model = YOLO("YOLO11-Improved.pt")
 model.to('cpu')
 st.sidebar.header("🔧 Detection Settings")
 conf_threshold = st.sidebar.slider("Confidence Threshold", 0.1, 0.9, 0.3, 0.05)
